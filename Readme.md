@@ -9,7 +9,7 @@ By now the only indicator calculated is the Exponential moving average.
 ## Detailed description
 
 The Main.py file orchestrate all the scripts to run all the possible options.
-This options are described bellow.
+These options are described bellow.
 
 * **Update Symbol**: Allows to update in the database the information about one or more symbols.
 
