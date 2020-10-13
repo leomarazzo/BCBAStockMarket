@@ -19,7 +19,7 @@ These options are described bellow.
 
 * **Calculate Exponential Moving Average Crossover**: Calculates the EMA Crosover for one ore more symbols based on the Parameters.xlsx file. It saves the file in the Graphics folder.
 
-* **Simulate Exponential Moving Average Crossover**: Simulates parameters for the EMA Crossover to calculate the most profitable combination. It saves a results file with the symbol name in CSV format.
+* **Simulate Exponential Moving Average Crossover**: Simulates parameters for the EMA Crossover to calculate the most profitable combination. It saves an Excel file with the 50 most profitable parameters
 
 * **Show EMA Crossover parameters**: Shows the Parameters.xlsx
 

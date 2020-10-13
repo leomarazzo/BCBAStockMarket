@@ -12,7 +12,7 @@ def simular(symbol, historico):
     output = pd.DataFrame(columns=["Short EMA", "Long EMA", "Total trades", "Total efficency", "Average efficency",
                                    "Efficencies averages", "Average Duration", "Positive trades", "Negative trades", "Efficency probability"])
     for i in range(2, 21):
-        for j in range(21, 60):
+        for j in range(21, 61):
             print("{} ---- {} ---- {}".format(symbol, i, j))
             DineroIncial = 10000
             DineroDisponible = 20000
@@ -85,7 +85,7 @@ def simular(symbol, historico):
                 CantidadComprada = 0
                 ContadorTrades = ContadorTrades + 1
                 OperacionAbierta = False
-
+            
             if (ContadorTrades > 0):
                 DineroFinal = DineroDisponible
                 EficiaTotal = (DineroFinal - DineroIncial) / DineroIncial
@@ -93,7 +93,7 @@ def simular(symbol, historico):
                 PromedioEficacia = SUMEficaciaOperacion / ContadorTrades
                 ProbabilidadEficacia = ContadorTradesPositivos / ContadorTrades
                 PromedioDuracion = int(SUMDiasOperacion / ContadorTrades)
-                output.append({
+                output = output.append({
                     "Short EMA": i,
                     "Long EMA": j,
                     "Total trades": ContadorTrades,
@@ -105,4 +105,4 @@ def simular(symbol, historico):
                     "Negative trades": ContadorTradesNegativos,
                     "Efficency probability": ProbabilidadEficacia
                 }, ignore_index=True)
-                output.to_excel("Simulations/{}.xlsx".format(symbol))
+    output.sort_values(by='Total efficency', ascending=False).head(50).to_excel("Simulations/{}.xlsx".format(symbol))
