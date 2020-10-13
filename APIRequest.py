@@ -33,10 +33,12 @@ def ConnectToAPI(symbol, datefrom, resolution):
     res = conn.getresponse()
     data = res.read()
     info = json.loads(data.decode("utf-8"))
-    json.dump(info,open("test.json", 'w'))
     info = info["bars"]
     
     conn.close()
+
+    if not(info):
+        return True
 
     for entry in info:
         t = entry["time"]
@@ -48,6 +50,8 @@ def ConnectToAPI(symbol, datefrom, resolution):
         date = str(dateandtime.date().isoformat())
         DatabaseActions.insertToDatabase(
             date, symbol, o, h, l, c)
+    
+    return False
 
 
 def scrapping(symbol):
@@ -57,10 +61,11 @@ def scrapping(symbol):
     else:
         day = datetime.datetime.today().date()
 
-    while (lastDate < day.isoformat()):
+    empty = False
+    while (lastDate < day.isoformat() and not(empty)):
         if len(lastDate) > 0:
-            ConnectToAPI(
+            empty = ConnectToAPI(
                 symbol, datetime.datetime.fromisoformat(lastDate), "D")
         else:
-            ConnectToAPI(symbol, datetime.datetime(1800, 1, 1), "D")
+            empty = ConnectToAPI(symbol, datetime.datetime(1900, 1, 1), "D")
         lastDate = DatabaseActions.getLastDate(symbol)

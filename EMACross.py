@@ -3,9 +3,11 @@ import datetime
 import ExponentialMovingAverage
 import mplfinance as mpf
 import matplotlib.pyplot as plt
+import os
 
 def EMACrossover(historic, symbol, parameters):
-    
+    if (not(os.path.exists("Graphics"))):
+        os.makedirs("Simulations")
     periodoCorto = int(parameters.loc[symbol]['MMC'])
     periodoLargo = int(parameters.loc[symbol]['MML'])
     historicDF = {}

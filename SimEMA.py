@@ -1,16 +1,19 @@
 import ExponentialMovingAverage
 import pandas as pd
 import datetime
+import os
 
 
 def simular(symbol, historico):
-    # 
+    if (not(os.path.exists("Simulations"))):
+        os.makedirs("Simulations")
+    
     f = open('{}.csv'.format(symbol).replace("/","-"), 'a')
     f.write("Short EMA;Long EMA;Total trades;Total efficency;Average efficency;Efficencies averages;Average Duration;Positive trades;Negative trades;Efficency probability\n")
     f.close()
     for i in range(2, 21):
         for j in range(21, 60):
-            print("{} ---- {}".format(i, j))
+            print("{} ---- {} ---- {}".format(symbol, i, j))
             DineroIncial = 10000
             DineroDisponible = 20000
             OperacionAbierta = False
