@@ -2,15 +2,15 @@ import ExponentialMovingAverage
 import pandas as pd
 import datetime
 import os
+import openpyxl
 
 
 def simular(symbol, historico):
     if (not(os.path.exists("Simulations"))):
         os.makedirs("Simulations")
-    
-    f = open('{}.csv'.format(symbol).replace("/","-"), 'a')
-    f.write("Short EMA;Long EMA;Total trades;Total efficency;Average efficency;Efficencies averages;Average Duration;Positive trades;Negative trades;Efficency probability\n")
-    f.close()
+
+    output = pd.DataFrame(columns=["Short EMA", "Long EMA", "Total trades", "Total efficency", "Average efficency",
+                                   "Efficencies averages", "Average Duration", "Positive trades", "Negative trades", "Efficency probability"])
     for i in range(2, 21):
         for j in range(21, 60):
             print("{} ---- {} ---- {}".format(symbol, i, j))
@@ -85,7 +85,7 @@ def simular(symbol, historico):
                 CantidadComprada = 0
                 ContadorTrades = ContadorTrades + 1
                 OperacionAbierta = False
-            
+
             if (ContadorTrades > 0):
                 DineroFinal = DineroDisponible
                 EficiaTotal = (DineroFinal - DineroIncial) / DineroIncial
@@ -93,8 +93,16 @@ def simular(symbol, historico):
                 PromedioEficacia = SUMEficaciaOperacion / ContadorTrades
                 ProbabilidadEficacia = ContadorTradesPositivos / ContadorTrades
                 PromedioDuracion = int(SUMDiasOperacion / ContadorTrades)
-                # "MMC;MML;Trades Totales;Eficacia total;Eficacia promedio;Promedio Eficacias;Promedio Duracion;Trades Positivos;Trades Negativos;Probabilidad de eficacia\n"
-                fs = "{};{};{};{};{};{};{};{};{};{};\n"
-                f = open('{}.csv'.format(symbol).replace("/","-"), 'a')
-                f.write(fs.format(i, j, ContadorTrades, EficiaTotal, EficaciaPromedio, PromedioEficacia, PromedioDuracion, ContadorTradesPositivos, ContadorTradesNegativos, ProbabilidadEficacia).replace(".", ","))
-                f.close
+                output.append({
+                    "Short EMA": i,
+                    "Long EMA": j,
+                    "Total trades": ContadorTrades,
+                    "Total efficency": EficiaTotal,
+                    "Average efficency": EficaciaPromedio,
+                    "Efficencies averages": PromedioEficacia,
+                    "Average Duration": PromedioDuracion,
+                    "Positive trades": ContadorTradesPositivos,
+                    "Negative trades": ContadorTradesNegativos,
+                    "Efficency probability": ProbabilidadEficacia
+                }, ignore_index=True)
+                output.to_excel("Simulations/{}.xlsx".format(symbol))
