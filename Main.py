@@ -10,7 +10,11 @@ import Logs
 import os
 
 def actualizar():
-    symbols = input("Input a symbol or many separated by comma: ").split(",")
+    symbols = input("Input a symbol or many separated by comma (Input ALL to update all symbols): ")
+    if symbols.upper() == "ALL":
+        symbols = DatabaseActions.getAll()
+    else:
+        symbols = symbols.split(",")
     for symbol in symbols:
         APIRequest.scrapping(symbol)
 
@@ -47,13 +51,21 @@ def EMA():
     print(df)
 
 def SimulacionEMA():
-    symbols = input("Input a symbol or many separated by comma: ").split(",")
+    symbols = input("Input a symbol or many separated by comma (Input ALL to Simulate for all symbols): ")
+    if symbols.upper() == "ALL":
+        symbols = DatabaseActions.getAll()
+    else:
+        symbols = symbols.split(",")
     for symbol in symbols:
         historico = DatabaseActions.getHistoric(symbol)
         SimEMA.simular(symbol,historico)
     
 def EMACrossover():
-    symbols = input("Input a symbol or many separated by comma: ").split(",")
+    symbols = input("Input a symbol or many separated by comma(Input ALL to Calculate for all symbols): ")
+    if symbols.upper() == "ALL":
+        symbols = DatabaseActions.getAll()
+    else:
+        symbols = symbols.split(",")
     parameters = pd.read_excel('Parameters.xlsx')
     parameters = parameters.set_index('Simbolo')
     for symbol in symbols:    

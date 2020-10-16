@@ -75,6 +75,27 @@ def getHistoric(symbol):
         logger.error("Error connecting to database: {}".format(st.split(";")[1]))
         raise Exception("Error connecting to database")
 
+def getAll():
+    logger = Logs.setup_logger("getAll", "Logs/DatabaseActions.log")
+    config = json.load(open("config.json"))
+    st = config["st"]
+    try:
+        logger.info("Connectiong to database")
+        cnxn = pyodbc.connect(st)
+        cursor = cnxn.cursor()
+
+        logger.info("Getting symbols")
+        sql_cmd = "SELECT DISTINCT Symbol from Simbolos"
+        cursor.execute(sql_cmd)
+
+        historic = []
+        for row in cursor:
+            historic.append(row[0].strip())
+        return historic
+    except:
+        logger.error("Error connecting to database: {}".format(st.split(";")[1]))
+        raise Exception("Error connecting to database")
+
     
     
         

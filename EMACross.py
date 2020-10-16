@@ -10,7 +10,6 @@ import sys
 def EMACrossover(historic, symbol, parameters):
     logger = Logs.setup_logger("EMACrossover", "Logs/EMACrossover.log", console=False)
     try:
-        print("Test {}".format(symbol))
         periodoCorto = int(parameters.loc[symbol]['MMC'])
         periodoLargo = int(parameters.loc[symbol]['MML'])
         logger.info("Calculating EMA cross: {}, {}, {}".format(symbol, periodoCorto, periodoLargo))
