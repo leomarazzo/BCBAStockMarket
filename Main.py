@@ -6,6 +6,8 @@ import mplfinance as mpf
 import ExponentialMovingAverage
 import SimEMA
 import EMACross
+import Logs
+import os
 
 def actualizar():
     symbols = input("Input a symbol or many separated by comma: ").split(",")
@@ -60,11 +62,17 @@ def EMACrossover():
 
 def params():
     parameters = pd.read_excel('Parameters.xlsx')
+    parameters = parameters.sort_values(by='Simbolo')
     parameters = parameters.set_index('Simbolo')
-    print(parameters)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(parameters)
 
 if __name__ == "__main__":
     op = '1'
+    if (not(os.path.exists("Logs"))):
+        os.makedirs("Logs")
+    if (not(os.path.exists("Graphics"))):
+        os.makedirs("Graphics")
     while op.lower() != 'q':
         print("Select an option")
         print("1 - Update Symbol")
