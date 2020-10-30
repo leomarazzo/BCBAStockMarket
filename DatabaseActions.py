@@ -8,7 +8,7 @@ def insertToDatabase(date, symbol, o, h, l, c):
     config = json.load(open("config.json"))
     st = config["st"]
     try:
-        logger.info("Connectiong to database")
+        logger.info("Connecting to database")
         cnxn = pyodbc.connect(st)
         cursor = cnxn.cursor()
     except:
@@ -28,7 +28,7 @@ def insertToDatabase(date, symbol, o, h, l, c):
         sqlstate = ex.args[1]
         print(sqlstate)
     except:
-        logger.error("Error sending data to database: ".format(sys.exc_info()[1]))
+        logger.error("Error sending data to database: {}".format(sys.exc_info()[1]))
         raise Exception("Error sending data")
 
 def getLastDate(symbol):
@@ -59,7 +59,7 @@ def getHistoric(symbol):
     config = json.load(open("config.json"))
     st = config["st"]
     try:
-        logger.info("Connectiong to database")
+        logger.info("Connecting to database")
         cnxn = pyodbc.connect(st)
         cursor = cnxn.cursor()
 
@@ -80,7 +80,7 @@ def getAll():
     config = json.load(open("config.json"))
     st = config["st"]
     try:
-        logger.info("Connectiong to database")
+        logger.info("Connecting to database")
         cnxn = pyodbc.connect(st)
         cursor = cnxn.cursor()
 
@@ -92,6 +92,17 @@ def getAll():
         for row in cursor:
             historic.append(row[0].strip())
         return historic
+    except:
+        logger.error("Error connecting to database: {}".format(st.split(";")[1]))
+        raise Exception("Error connecting to database")
+
+def testConnection():
+    logger = Logs.setup_logger("testConnection", "Logs/DatabaseActions.log")
+    config = json.load(open("config.json"))
+    st = config["st"]
+    try:
+        logger.info("Connecting to database")
+        pyodbc.connect(st)
     except:
         logger.error("Error connecting to database: {}".format(st.split(";")[1]))
         raise Exception("Error connecting to database")

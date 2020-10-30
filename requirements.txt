@@ -1,6 +1,6 @@
-pandas==1.0.3
-mplfinance==0.12.7a0
-matplotlib==3.2.1
-openpyxl==3.0.5
-pyodbc==4.0.30
-python_dateutil==2.8.1
+pandas
+mplfinance
+matplotlib
+openpyxl
+pyodbc
+python_dateutil

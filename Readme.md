@@ -13,15 +13,13 @@ These options are described bellow.
 
 * **Update Symbol**: Allows to update in the database the information about one or more symbols.
 
-* **Show historic data**: Show the historic data from one symbol in a table and a plot.
+* **Show historic data**: Show the historic data from one symbol allowing the user to add EMA and RSI indicators. It prints a table and a plot.
 
-* **Calculate Exponential Moving Average**: Allows to calculate one or more Exponential Moving Average for a symbol and show it in a table.
+* **Create technical analysis graphics with saved parameters**: Calculates the EMA Crosover and RSI for one ore more symbols based on the Parameters.xlsx file. It saves the file in the Graphics folder.
 
-* **Calculate Exponential Moving Average Crossover**: Calculates the EMA Crosover for one ore more symbols based on the Parameters.xlsx file. It saves the file in the Graphics folder.
+* **Simulate Exponential Moving Average Crossover & Relative Strength Index**: Simulates parameters for the EMA Crossover and RSI to calculate the most profitable combination. It saves an Excel file with the 50 most profitable parameters.
 
-* **Simulate Exponential Moving Average Crossover**: Simulates parameters for the EMA Crossover to calculate the most profitable combination. It saves an Excel file with the 50 most profitable parameters
-
-* **Show EMA Crossover parameters**: Shows the Parameters.xlsx
+* **Show parameters**: Shows the Parameters.xlsx file.
 
 
 ## Requirements.

@@ -2,12 +2,16 @@ import APIRequest
 import DatabaseActions
 import pandas as pd
 import datetime
-import mplfinance as mpf
 import ExponentialMovingAverage
-import SimEMA
-import EMACross
+import RelativeStrengthIndex
+import SimulationEMAndRSI
+import TechnicalAnalysis
 import Logs
 import os
+import sys
+import matplotlib.pyplot as plt
+from mplfinance.original_flavor import candlestick_ohlc
+from matplotlib.pylab import date2num
 
 def actualizar():
     symbols = input("Input a symbol or many separated by comma (Input ALL to update all symbols): ")
@@ -27,30 +31,53 @@ def historico():
         historicDF[datetime.datetime.fromisoformat(key)] = historico[key]
     df = pd.DataFrame.from_dict(historicDF, orient='index').tail(50).rename(
         columns={'o': 'Open', 'h': 'High', 'l': 'Low', 'c': 'Close'})
-    print(df)
-    mpf.plot(df, type='candle', title=symbol)
-
-
-def EMA():
-    symbol = input("Input a symbol: ")
-    op = 's'
-    historico = DatabaseActions.getHistoric(symbol)
-    historicDF = {}
-    for key in historico:
-        historicDF[datetime.datetime.fromisoformat(key)] = historico[key]
-    df = pd.DataFrame.from_dict(historicDF, orient='index').rename(
-        columns={'o': 'Open', 'h': 'High', 'l': 'Low', 'c': 'Close'})
-    while op.lower() == 's':
+    
+    op = input("¿Agregar RSI? S/N: ")
+    if op.lower() == 's':
+        titulo = 'RSI'
         periodo = int(input("Ingrese el periodo: "))
+        RSI = RelativeStrengthIndex.RSI(historico, periodo)
+        df[titulo] = df.index.to_series().map(RSI)
+    
 
-        EMAS = ExponentialMovingAverage.EMA(historico, periodo)
+    op = input("¿Agregar EMA? S/N: ")
+    while op.lower() == 's':
         titulo = input("Ingrese un titulo para la EMA: ")
+        periodo = int(input("Ingrese el periodo: "))
+        EMAS = ExponentialMovingAverage.EMA(historico, periodo)
         df[titulo] = df.index.to_series().map(EMAS)
-
         op = input("¿Agregar otra EMA? S/N: ")
+    
     print(df)
+    data = df.tail(30)
+    columns = list(data.columns)[4:]
+    fig = plt.figure()
+    fig.set_size_inches((20, 16))
+    ax_candle = fig.add_axes((0, 0.05, 1, 0.9))
+    ax_candle.xaxis_date()
+    if 'RSI' in columns:
+        ax_candle = fig.add_axes((0, 0.30, 1, 0.7))
+        ax_rsi = fig.add_axes((0, 0.05, 1, 0.2), sharex=ax_candle)
+        ax_rsi.set_ylabel("(%)")
+        ax_rsi.plot(data.index, [70] * len(data.index), label="overbought")
+        ax_rsi.plot(data.index, [30] * len(data.index), label="oversold")
+        ax_rsi.plot(data.index, data["RSI"], label="RSI")
+        ax_rsi.legend(loc="center left")
+    
+    ohlc = []
+    for date, row in data.iterrows():
+        Open, High, Low, Close = row[:4]
+        ohlc.append([date2num(date), Open, High, Low, Close])
 
-def SimulacionEMA():
+    for column in columns:
+        if column != 'RSI':
+            ax_candle.plot(data.index, data[column], label=column)
+    candlestick_ohlc(ax_candle, ohlc, colorup="g", colordown="r")
+    ax_candle.legend()
+    plt.show()
+    
+
+def SimulacionEMAandRSI():
     symbols = input("Input a symbol or many separated by comma (Input ALL to Simulate for all symbols): ")
     if symbols.upper() == "ALL":
         symbols = DatabaseActions.getAll()
@@ -58,51 +85,65 @@ def SimulacionEMA():
         symbols = symbols.split(",")
     for symbol in symbols:
         historico = DatabaseActions.getHistoric(symbol)
-        SimEMA.simular(symbol,historico)
+        SimulationEMAndRSI.simular(symbol,historico)
     
-def EMACrossover():
+def GraphicsTechnicalAnalysis():
     symbols = input("Input a symbol or many separated by comma(Input ALL to Calculate for all symbols): ")
     if symbols.upper() == "ALL":
         symbols = DatabaseActions.getAll()
     else:
         symbols = symbols.split(",")
-    parameters = pd.read_excel('Parameters.xlsx')
-    parameters = parameters.set_index('Simbolo')
     for symbol in symbols:    
         historic = DatabaseActions.getHistoric(symbol)
-        EMACross.EMACrossover(historic, symbol, parameters)
+        TechnicalAnalysis.Graphics(historic, symbol, parameters)
 
 def params():
-    parameters = pd.read_excel('Parameters.xlsx')
-    parameters = parameters.sort_values(by='Simbolo')
-    parameters = parameters.set_index('Simbolo')
+    symbol = input("Input a symbol (Input ALL to show for all symbols): ").upper()
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print(parameters)
+        if symbol == "ALL":
+            print(parameters)
+        else:
+            if symbol in list(parameters.index):
+                print(parameters.loc[[symbol]])
+            else:
+                print("Symbol not in parameters.xlsx")
 
 if __name__ == "__main__":
-    op = '1'
     if (not(os.path.exists("Logs"))):
         os.makedirs("Logs")
     if (not(os.path.exists("Graphics"))):
         os.makedirs("Graphics")
+    if (not(os.path.exists("Simulations"))):
+        os.makedirs("Simulations")
+    try:
+        DatabaseActions.testConnection()
+    except:
+        raise Exception("Error connecting to database. Please check the connection string and the server connection.")
+    logger = Logs.setup_logger("scrapping", "Logs/APIRequest.log")
+    op = '1'
+    parameters = pd.read_excel('Parameters.xlsx')
+    parameters = parameters.sort_values(by='Simbolo')
+    parameters = parameters.set_index('Simbolo')
+    
     while op.lower() != 'q':
         print("Select an option")
         print("1 - Update Symbol")
         print("2 - Show historic data")
-        print("3 - Calculate Exponential Moving Average")
-        print("4 - Calculate Exponential Moving Average Crossover")
-        print("5 - Simulate Exponential Moving Average Crossover")
-        print("6 - Show EMA Crossover parameters")
+        print("3 - Create technical analysis graphics with saved parameters")
+        print("4 - Simulate Exponential Moving Average Crossover & Relative Strength Index")
+        print("5 - Show Parameters RSI and EMA Crossover")
         print("q - Quit")
         print("")
         op = input("Enter an option: ")
         switcher = {
             '1': actualizar,
             '2': historico,
-            '3': EMA,
-            '4': EMACrossover,
-            '5': SimulacionEMA,
-            '6': params
+            '3': GraphicsTechnicalAnalysis,
+            '4': SimulacionEMAandRSI,
+            '5': params
         }
         func = switcher.get(op, lambda: "Invalid option")
-        func()
+        try:
+            func()
+        except Exception:
+            logger.error(sys.exc_info()[1])
