@@ -3,7 +3,6 @@ import json
 import datetime
 from dateutil import tz
 import urllib
-import time
 import calendar
 import DatabaseActions
 import Logs

@@ -4,3 +4,4 @@ __pycache__
 Simulations/*.xlsx
 *.png
 *.log
+.vscode

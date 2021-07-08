@@ -5,7 +5,9 @@ import datetime
 import ExponentialMovingAverage
 import RelativeStrengthIndex
 import SimulationEMAndRSI
+import SimulationStoch
 import TechnicalAnalysis
+import SimulationEMA
 import Logs
 import os
 import sys
@@ -49,7 +51,7 @@ def historico():
         op = input("¿Agregar otra EMA? S/N: ")
     
     print(df)
-    data = df.tail(30)
+    data = df.tail(100)
     columns = list(data.columns)[4:]
     fig = plt.figure()
     fig.set_size_inches((20, 16))
@@ -86,6 +88,26 @@ def SimulacionEMAandRSI():
     for symbol in symbols:
         historico = DatabaseActions.getHistoric(symbol)
         SimulationEMAndRSI.simular(symbol,historico)
+
+def SimulacionEMA():
+    symbols = input("Input a symbol or many separated by comma (Input ALL to Simulate for all symbols): ")
+    if symbols.upper() == "ALL":
+        symbols = DatabaseActions.getAll()
+    else:
+        symbols = symbols.split(",")
+    for symbol in symbols:
+        historico = DatabaseActions.getHistoric(symbol)
+        SimulationEMA.simular(symbol,historico)
+
+def SimulacionStoch():
+    symbols = input("Input a symbol or many separated by comma (Input ALL to Simulate for all symbols): ")
+    if symbols.upper() == "ALL":
+        symbols = DatabaseActions.getAll()
+    else:
+        symbols = symbols.split(",")
+    for symbol in symbols:
+        historico = DatabaseActions.getHistoric(symbol)
+        SimulationStoch.simular(symbol,historico)
     
 def GraphicsTechnicalAnalysis():
     symbols = input("Input a symbol or many separated by comma(Input ALL to Calculate for all symbols): ")
@@ -95,26 +117,31 @@ def GraphicsTechnicalAnalysis():
         symbols = symbols.split(",")
     for symbol in symbols:    
         historic = DatabaseActions.getHistoric(symbol)
-        TechnicalAnalysis.Graphics(historic, symbol, parameters)
+        TechnicalAnalysis.GraphicsStoch(historic, symbol, parameters)
 
 def params():
     symbol = input("Input a symbol (Input ALL to show for all symbols): ").upper()
     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
         if symbol == "ALL":
             print(parameters)
+        elif symbol in list(parameters.index):
+            print(parameters.loc[symbol])
         else:
-            if symbol in list(parameters.index):
-                print(parameters.loc[[symbol]])
-            else:
-                print("Symbol not in parameters.xlsx")
+            print("Symbol not in parameters.xlsx")
 
 if __name__ == "__main__":
     if (not(os.path.exists("Logs"))):
         os.makedirs("Logs")
     if (not(os.path.exists("Graphics"))):
         os.makedirs("Graphics")
+    else:
+        for path in os.listdir("Graphics"):
+            os.remove(os.path.join("Graphics", path))
     if (not(os.path.exists("Simulations"))):
         os.makedirs("Simulations")
+    else:
+        for path in os.listdir("Simulations"):
+            os.remove(os.path.join("Simulations", path))
     try:
         DatabaseActions.testConnection()
     except:
@@ -122,7 +149,6 @@ if __name__ == "__main__":
     logger = Logs.setup_logger("scrapping", "Logs/APIRequest.log")
     op = '1'
     parameters = pd.read_excel('Parameters.xlsx')
-    parameters = parameters.sort_values(by='Simbolo')
     parameters = parameters.set_index('Simbolo')
     
     while op.lower() != 'q':
@@ -130,8 +156,10 @@ if __name__ == "__main__":
         print("1 - Update Symbol")
         print("2 - Show historic data")
         print("3 - Create technical analysis graphics with saved parameters")
-        print("4 - Simulate Exponential Moving Average Crossover & Relative Strength Index")
-        print("5 - Show Parameters RSI and EMA Crossover")
+        print("4 - Simulate Exponential Moving Average Crossover")
+        print("5 - Simulate Exponential Moving Average Crossover & Relative Strength Index")
+        print("6 - Simulate Stochastic ocillator")
+        print("7 - Show Stochastic parameters")
         print("q - Quit")
         print("")
         op = input("Enter an option: ")
@@ -139,8 +167,10 @@ if __name__ == "__main__":
             '1': actualizar,
             '2': historico,
             '3': GraphicsTechnicalAnalysis,
-            '4': SimulacionEMAandRSI,
-            '5': params
+            '4': SimulacionEMA,
+            '5': SimulacionEMAandRSI,
+            '6': SimulacionStoch,
+            '7': params
         }
         func = switcher.get(op, lambda: "Invalid option")
         try:
